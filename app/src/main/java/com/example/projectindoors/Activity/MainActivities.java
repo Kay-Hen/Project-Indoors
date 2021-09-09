@@ -5,11 +5,17 @@ import static android.content.ContentValues.TAG;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconAllowOverlap;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconIgnorePlacement;
 import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconImage;
+import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.app.Activity;
+import android.content.Intent;
 import android.content.pm.PackageManager;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.Color;
+import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
@@ -20,13 +26,16 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
+import androidx.core.content.res.ResourcesCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
 import com.mapbox.api.directions.v5.models.DirectionsRoute;
+import com.mapbox.api.geocoding.v5.models.CarmenFeature;
 import com.mapbox.geojson.Feature;
+import com.mapbox.geojson.FeatureCollection;
 import com.mapbox.geojson.GeoJson;
 import com.mapbox.geojson.Point;
 import com.mapbox.mapboxsdk.Mapbox;
@@ -42,8 +51,11 @@ import com.mapbox.mapboxsdk.maps.MapView;
 import com.mapbox.mapboxsdk.maps.MapboxMap;
 import com.mapbox.mapboxsdk.maps.OnMapReadyCallback;
 import com.mapbox.mapboxsdk.maps.Style;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.PlaceAutocomplete;
+import com.mapbox.mapboxsdk.plugins.places.autocomplete.model.PlaceOptions;
 import com.mapbox.mapboxsdk.style.layers.SymbolLayer;
 import com.mapbox.mapboxsdk.style.sources.GeoJsonSource;
+import com.mapbox.mapboxsdk.utils.BitmapUtils;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncher;
 import com.mapbox.services.android.navigation.ui.v5.NavigationLauncherOptions;
 import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
@@ -67,6 +79,10 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
     DirectionsRoute currentRoute;
     NavigationMapRoute navigationMapRoute;
     Button button;
+    private FloatingActionButton fab_location_search;
+    private static final int REQUEST_CODE_AUTOCOMPLETE =7171;
+    private String geoJsonSourceLayerId = "GeoJsonSourceLayerId";
+    private String symbolIconId = "SymbolIconId";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -122,17 +138,85 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                                         .shouldSimulateRoute(simulateRoute)
                                         .build();
                                 NavigationLauncher.startNavigation(MainActivities.this, options);
+
                             }
 
 
 
                         });
 
+                        initSearchfab();
+                        setUpSource(style);
+                        setUpLayer(style);
+                        Drawable drawable = ResourcesCompat.getDrawable(getResources(), R.drawable.ic_baseline_location_on_purple, null);
+                        Bitmap bitmap = BitmapUtils.getBitmapFromDrawable(drawable);
+                        style.addImage(symbolIconId, bitmap);
 
                     }
                 });
 
     }
+
+    private void setUpLayer(Style loadedMapStyle) {
+        loadedMapStyle.addLayer(new SymbolLayer("SYMBOL_LAYER_ID", geoJsonSourceLayerId).withProperties(iconImage(symbolIconId),
+                iconOffset(new Float[] {0f, -8f})));
+    }
+
+    private void setUpSource(Style loadedMapStyle)
+    {
+        loadedMapStyle.addSource(new GeoJsonSource(geoJsonSourceLayerId));
+    }
+
+    private void initSearchfab()
+    {
+        fab_location_search = findViewById(R.id.fab_location_search);
+        fab_location_search.setOnClickListener(view -> {
+            Intent intent = new PlaceAutocomplete.IntentBuilder()
+                    .accessToken(Mapbox.getAccessToken() != null ? Mapbox.getAccessToken() : getString(R.string.access_token))
+                    .placeOptions(PlaceOptions.builder()
+                            .backgroundColor(Color.parseColor("#EEEEEE"))
+                            .limit(10)
+                            .build(PlaceOptions.MODE_CARDS))
+                    .build(this);
+
+
+            startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
+
+
+
+
+        });
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == Activity.RESULT_OK && requestCode == REQUEST_CODE_AUTOCOMPLETE){
+            /*Retrieve selected location's CarmenFeature*/
+            CarmenFeature selectedCarmenFeature = PlaceAutocomplete.getPlace(data);
+
+            /*Create a new FeatureCollection and add a new feature to it using selectedCarmenFeature above.
+             *then retrieve and update the source designated for showing a selected location's symbol layer icon*/
+            if (mapboxMap != null){
+                Style style = mapboxMap.getStyle();
+                if (style != null){
+                    GeoJsonSource source = style.getSourceAs(geoJsonSourceLayerId);
+                    if (source != null){
+                        source.setGeoJson(FeatureCollection.fromFeatures(new Feature[]{Feature.fromJson(selectedCarmenFeature.toJson())}));
+                    }
+                    /*Move map camera to the selected location*/
+                    mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
+                            .target(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
+                                    ((Point) selectedCarmenFeature.geometry()).longitude())).zoom(14)
+                            .build()),4000);
+
+                }
+
+            }
+
+        }
+    }
+
+
 
 
     private void addDestinationIconSymbolLayer(@NonNull Style loadedMapStyle) {
