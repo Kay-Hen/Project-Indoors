@@ -2,5 +2,10 @@
     <string name="app_name">Project Indoors</string>
     <string name="user_location_permission_not_granted">Please enable permission to access location</string>
     <string name="user_location_permission_explanation">Permission denied!, allow permissions</string>
+    <string name="enable_permission">Enable Permission</string>
+    <string name="map_permission">Location Permission</string>
+    <string name="title_activity_lead_maps">Map</string>
+    <string name="latitude">Latitude</string>
+    <string name="longitude">Longitude</string>
 
 </resources>

@@ -9,7 +9,7 @@ buildscript {
 
     }
     dependencies {
-        classpath "com.android.tools.build:gradle:4.1.2"
+        classpath 'com.android.tools.build:gradle:7.0.0'
 
         // NOTE: Do not place your application dependencies here; they belong
         // in the individual module build.gradle files
@@ -33,7 +33,7 @@ allprojects {
                 // This should always be `mapbox` (not your username).
                 username = 'mapbox'
                 // Use the secret token you stored in gradle.properties as the password
-                password = project.properties['sk.eyJ1Ijoia3dhYm5hIiwiYSI6ImNrcnVneHViMjFhMWEyb21qcXJmajB0emYifQ.FBtzCPcg6RAvlnrLsIOpHw'] ?: ""
+                password = project.properties['sk.eyJ1Ijoia3dhYm5hIiwiYSI6ImNrdGE1N2JieTA3YXgyd215YnlvenI5dGIifQ.lfZDCqfaoXlmvi3zfsgSsw'] ?: ""
             }
         }
 

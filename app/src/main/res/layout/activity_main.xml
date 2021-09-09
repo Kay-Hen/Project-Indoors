@@ -1,29 +1,52 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".MainActivity">
+    tools:context="MainActivities">
 
    <com.mapbox.mapboxsdk.maps.MapView
        android:id="@+id/mapView"
        android:layout_width="match_parent"
-       android:layout_height="match_parent">
+       android:layout_height="match_parent"
+       mapbox:mapbox_cameraZoom="5">
+
+      <com.google.android.material.floatingactionbutton.FloatingActionButton
+          android:id="@+id/centerLoc"
+          android:layout_width="wrap_content"
+          android:layout_height="wrap_content"
+          android:layout_gravity="center|right"
+          android:layout_marginRight="15dp"
+          android:layout_marginBottom="15dp"
+          android:background="@color/mapboxWhite"
+          android:backgroundTint="#FFFFFF"
+          android:onClick="onClick"
+          android:src="@drawable/current_location_icon"
+          android:tint="@color/white" />
+
+      <Button
+          android:id="@+id/Button"
+          android:layout_width="fill_parent"
+          android:layout_height="wrap_content"
+          android:layout_marginStart="16dp"
+          android:layout_marginLeft="16dp"
+          android:layout_marginEnd="16dp"
+          android:layout_marginRight="16dp"
+          android:background="@color/teal_700"
+          android:enabled="false"
+          android:onClick="onClick"
+          android:text="Start navigation"
+          android:textColor="@color/mapbox_blue"
+          mapbox:layout_constraintBottom_toBottomOf="parent"
+          mapbox:layout_constraintEnd_toEndOf="parent"
+          mapbox:layout_constraintStart_toStartOf="parent"
+          mapbox:layout_constraintTop_toTopOf="parent"
+          mapbox:layout_constraintVertical_bias="0.96" />
+
+
    </com.mapbox.mapboxsdk.maps.MapView>
 
-   <com.google.android.material.floatingactionbutton.FloatingActionButton
-       android:id="@+id/centerLoc"
-       android:layout_width="wrap_content"
-       android:layout_height="wrap_content"
-       android:layout_gravity="bottom|right"
-       android:layout_marginRight="15dp"
-       android:layout_marginBottom="15dp"
-       android:tint="@color/white"
 
-       />
-
-
-
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+</RelativeLayout>
