@@ -5,6 +5,7 @@
     <string name="enable_permission">Enable Permission</string>
 
     <string name="access_token">sk.eyJ1Ijoia3dhYm5hIiwiYSI6ImNrdGFkbTJmcDFrdGsydmxhMGNydGxyZW0ifQ.KLmz4uP8KRHQiVXbKMNWfg</string>
+    <string name="mapbox_idoors">mapbox://styles/kwabna/ckthnzkea0a1h18l5r7ohbjr8</string>
 
 
 

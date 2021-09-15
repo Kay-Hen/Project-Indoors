@@ -5,6 +5,7 @@
     xmlns:mapbox="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
+    android:orientation="vertical"
     tools:context="MainActivities">
 
    <com.mapbox.mapboxsdk.maps.MapView
@@ -24,36 +25,38 @@
           android:backgroundTint="#FFFFFF"
           android:onClick="onClick"
           android:src="@drawable/current_location_icon"
-          android:tint="@color/white" />
+          android:tint="@color/white"
+          tools:ignore="SpeakableTextPresentCheck" />
 
       <Button
           android:id="@+id/Button"
-          android:layout_width="360dp"
-          android:layout_height="wrap_content"
+          android:layout_width="735dp"
+          android:layout_height="61dp"
           android:layout_gravity="bottom"
           android:layout_marginStart="24dp"
           android:layout_marginTop="24dp"
           android:layout_marginBottom="24dp"
           android:layout_weight="8"
-          android:background="@color/colorPrimary"
+          android:background="@color/mapboxWhite"
           android:enabled="false"
           android:onClick="onClick"
           android:text="Start navigation"
-          android:textColor="@color/mapbox_blue" />
+          android:textColor="@color/mapboxWhite" />
 
       <com.google.android.material.floatingactionbutton.FloatingActionButton
           android:id="@+id/fab_location_search"
           android:layout_width="wrap_content"
           android:layout_height="wrap_content"
-          android:layout_gravity="top|right"
+          android:layout_gravity="top|left"
           android:layout_margin="16dp"
           android:layout_weight="2"
-          android:tint="@color/mapboxWhite"
           android:backgroundTint="#FFFFFF"
+          android:minHeight="20dp"
           android:src="@drawable/ic_baseline_search_24"
 
 
-          />
+          android:tint="@color/mapboxWhite"
+          tools:ignore="SpeakableTextPresentCheck" />
 
 
    </com.mapbox.mapboxsdk.maps.MapView>

@@ -52,7 +52,9 @@ dependencies {
     //Direction
     implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation-ui:0.42.6'
     implementation 'com.mapbox.mapboxsdk:mapbox-android-navigation:0.42.6'
-    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:5.0.0'
+    implementation 'com.mapbox.mapboxsdk:mapbox-sdk-services:5.1.0'
+    //implementation "com.mapbox.search:mapbox-search-android-ui:1.0.0-beta.18"
+    implementation 'com.mapbox.mapboxsdk:mapbox-android-core:3.1.0'
 
 
 

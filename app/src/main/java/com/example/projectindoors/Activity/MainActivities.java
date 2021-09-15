@@ -18,6 +18,9 @@ import android.graphics.Color;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
 import android.widget.Toast;
@@ -80,19 +83,20 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
     NavigationMapRoute navigationMapRoute;
     Button button;
     private FloatingActionButton fab_location_search;
-    private static final int REQUEST_CODE_AUTOCOMPLETE =7171;
+    private static final int REQUEST_CODE_AUTOCOMPLETE = 1;
     private String geoJsonSourceLayerId = "GeoJsonSourceLayerId";
     private String symbolIconId = "SymbolIconId";
+    private int status=0;
+    private Point originalPoint, destinationPoint;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
-        getSupportActionBar().hide();
+        //getSupportActionBar().hide();
 
         Mapbox.getInstance(this, "sk.eyJ1Ijoia3dhYm5hIiwiYSI6ImNrdGFkbTJmcDFrdGsydmxhMGNydGxyZW0ifQ.KLmz4uP8KRHQiVXbKMNWfg");
         setContentView(R.layout.activity_main);
-
         centerloc = (FloatingActionButton) findViewById(R.id.centerLoc);
 
         //Initiation of MapView
@@ -107,10 +111,11 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
                         locationComponent.getLastKnownLocation().getLongitude()))
-                .zoom(16)
+                .zoom(17)
                 .build();
         //    mapboxMap.setCameraPosition(cameraPosition);
-        mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),500);
+        mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),1000);
+
 
     }
 
@@ -120,7 +125,7 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
         this.mapboxMap = mapboxMap;
        // this.mapboxMap.setMinZoomPreference(6);
         mapboxMap.setStyle(new Style.Builder()
-                        .fromUri("mapbox://styles/kwabna/ckt1heyor10rh17nj4xep67dn"),
+                        .fromUri("mapbox://styles/kwabna/ckthnzkea0a1h18l5r7ohbjr8"),
                 new Style.OnStyleLoaded() {
                     @Override
                     public void onStyleLoaded(@NonNull Style style) {
@@ -129,15 +134,21 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
 
                         mapboxMap.addOnMapClickListener(MainActivities.this);
                         button = findViewById(R.id.Button);
+
                         button.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                boolean simulateRoute = true;
-                                NavigationLauncherOptions options = NavigationLauncherOptions.builder()
-                                        .directionsRoute(currentRoute)
-                                        .shouldSimulateRoute(simulateRoute)
-                                        .build();
-                                NavigationLauncher.startNavigation(MainActivities.this, options);
+                                if (status !=1){
+                                    NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                                            .directionsRoute(currentRoute)
+                                            .shouldSimulateRoute(true)
+                                            .build();
+                                    NavigationLauncher.startNavigation(MainActivities.this, options);
+                                }else if (status ==1){
+                                    status = 0;
+                                    getRoute(originalPoint, destinationPoint);
+                                }
+                                //boolean simulateRoute = true;
 
                             }
 
@@ -156,6 +167,7 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                 });
 
     }
+
 
     private void setUpLayer(Style loadedMapStyle) {
         loadedMapStyle.addLayer(new SymbolLayer("SYMBOL_LAYER_ID", geoJsonSourceLayerId).withProperties(iconImage(symbolIconId),
@@ -178,15 +190,10 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                             .limit(10)
                             .build(PlaceOptions.MODE_CARDS))
                     .build(this);
-
-
             startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
-
-
-
-
         });
     }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
@@ -206,15 +213,17 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                     /*Move map camera to the selected location*/
                     mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                             .target(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
-                                    ((Point) selectedCarmenFeature.geometry()).longitude())).zoom(14)
+                                    ((Point) selectedCarmenFeature.geometry()).longitude())).zoom(25)
                             .build()),4000);
+
+                    }
 
                 }
 
             }
 
         }
-    }
+
 
 
 
@@ -296,8 +305,8 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                         }
 
                     @Override
-                    public void onFailure(Call<DirectionsResponse> call, Throwable throwable) {
-                      Log.e(TAG, "Error: "+throwable.getMessage());
+                    public void onFailure(Call<DirectionsResponse> call, Throwable t) {
+                      Toast.makeText(MainActivities.this,"error"+t.toString(),Toast.LENGTH_SHORT).show();
 
                     }
                 });
@@ -409,6 +418,46 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
     public void onLowMemory() {
         super.onLowMemory();
         mapView.onLowMemory();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu){
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.menu,menu);
+        return true;
+
+    }
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.menu_street:
+                mapboxMap.setStyle(Style.MAPBOX_STREETS);
+                return true;
+            case R.id.menu_outdoors:
+                mapboxMap.setStyle(Style.OUTDOORS);
+                return true;
+            case R.id.menu_light:
+                mapboxMap.setStyle(Style.LIGHT);
+                return true;
+            case R.id.menu_dark:
+                mapboxMap.setStyle(Style.DARK);
+                return true;
+            case R.id.menu_satellite:
+                mapboxMap.setStyle(Style.SATELLITE);
+                return true;
+            case R.id.menu_traffic_day:
+                mapboxMap.setStyle(Style.TRAFFIC_DAY);
+                return true;
+            case R.id.menu_traffic_night:
+                mapboxMap.setStyle(Style.TRAFFIC_NIGHT);
+                return true;
+
+            case android.R.id.home:
+                finish();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
     }
 
 
