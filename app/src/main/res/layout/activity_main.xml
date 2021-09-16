@@ -30,13 +30,10 @@
 
       <Button
           android:id="@+id/Button"
-          android:layout_width="735dp"
-          android:layout_height="61dp"
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
           android:layout_gravity="bottom"
-          android:layout_marginStart="24dp"
-          android:layout_marginTop="24dp"
-          android:layout_marginBottom="24dp"
-          android:layout_weight="8"
+          android:layout_marginBottom="20dp"
           android:background="@color/mapboxWhite"
           android:enabled="false"
           android:onClick="onClick"

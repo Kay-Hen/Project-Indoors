@@ -21,7 +21,7 @@ public class ConnectionCheck extends AppCompatActivity {
 
         checkConnection();
 
-        Intent intent = new Intent(ConnectionCheck.this,MainActivities.class);
+        Intent intent = new Intent(getApplicationContext(),MainActivities.class);
         startActivity(intent);
         finish();
 
