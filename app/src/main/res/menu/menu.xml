@@ -47,4 +47,9 @@
         android:title="Traffic Night"
         app:showAsAction="never" />
 
+    <item
+        android:id="@+id/menu_indoor"
+        android:title="Indoor Map"
+        app:showAsAction="never"/>
+
 </menu>

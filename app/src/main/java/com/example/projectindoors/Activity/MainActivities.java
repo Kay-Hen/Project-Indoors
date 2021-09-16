@@ -427,6 +427,7 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
         return true;
 
     }
+    @SuppressLint("ResourceType")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
@@ -451,6 +452,15 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
             case R.id.menu_traffic_night:
                 mapboxMap.setStyle(Style.TRAFFIC_NIGHT);
                 return true;
+            case R.id.menu_indoor:
+             //   mapboxMap.setStyle((R.id.mapView);
+             //   mapboxMap.addOnMapClickListener(MainActivities.this);
+              //  setContentView(R.raw.style);
+                mapView = (MapView) findViewById(R.id.mapView);
+                mapView.getMapAsync(this);
+
+                return true;
+
 
             case android.R.id.home:
                 finish();
@@ -459,6 +469,8 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                 return super.onOptionsItemSelected(item);
         }
     }
+
+
 
 
 }

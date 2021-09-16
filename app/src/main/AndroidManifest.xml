@@ -15,9 +15,9 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.ProjectIndoors">
         <activity
-            android:name=".SplashActivity"
+            android:name=".MainActivities"
             android:exported="true" />
-        <activity android:name=".MainActivities">
+        <activity android:name=".SplashActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
