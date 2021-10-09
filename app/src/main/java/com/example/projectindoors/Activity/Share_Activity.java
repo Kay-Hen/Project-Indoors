@@ -6,16 +6,19 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import android.Manifest;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.telephony.SmsManager;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
 public class Share_Activity extends AppCompatActivity {
 
     EditText txt_pNumber, txt_Rt_begn, txt_Rt_Dest;
+    Button Send;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -25,6 +28,7 @@ public class Share_Activity extends AppCompatActivity {
         txt_Rt_begn = (EditText) findViewById(R.id.rt_beginning);
         txt_Rt_Dest = (EditText) findViewById(R.id.rt_destination);
         txt_pNumber = (EditText) findViewById(R.id.txt_phone_number);
+        Send = findViewById(R.id.rt_Send);
     }
 
     public void btn_send(View view) {
@@ -49,6 +53,7 @@ public class Share_Activity extends AppCompatActivity {
 
         if (!txt_pNumber.getText().toString().equals("") || !txt_Rt_begn.getText().toString().equals("") ||
                 !txt_Rt_Dest.getText().toString().equals("")) {
+
 
             SmsManager smsManager = SmsManager.getDefault();
 
@@ -83,6 +88,15 @@ public class Share_Activity extends AppCompatActivity {
                     break;
 
             }
+
+
+    }
+
+    public void Close(View view) {
+        Intent intent = new Intent(getApplicationContext(),MainActivities.class);
+        intent.putExtra("EXIT",true);
+        startActivity(intent);
+        finish();
 
 
     }
