@@ -10,13 +10,19 @@ import static com.mapbox.mapboxsdk.style.layers.PropertyFactory.iconOffset;
 import android.Manifest;
 import android.annotation.SuppressLint;
 import android.app.Activity;
+import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
 import android.graphics.drawable.Drawable;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Bundle;
+import android.provider.Settings;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -27,6 +33,7 @@ import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
+import androidx.appcompat.app.AlertDialog;
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
@@ -89,9 +96,12 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
     private int status=0;
     private Point originalPoint, destinationPoint;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+         Connectioncheck();
 
         //getSupportActionBar().hide();
 
@@ -107,11 +117,51 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
 
     }
 
+    private void Connectioncheck() {
+        ConnectivityManager manager = (ConnectivityManager) getApplicationContext().getSystemService(Context.CONNECTIVITY_SERVICE);
+
+        NetworkInfo activeNetwork = manager.getActiveNetworkInfo();
+
+        if (null != activeNetwork) {
+
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_WIFI) {
+
+                Toast.makeText(this, "wifi Enabled", Toast.LENGTH_SHORT).show();
+            }
+
+            if (activeNetwork.getType() == ConnectivityManager.TYPE_MOBILE) {
+
+                Toast.makeText(this, "Data Network Enabled", Toast.LENGTH_SHORT).show();
+            }
+
+        } else {
+            AlertDialog.Builder builder = new AlertDialog.Builder(MainActivities.this);
+            builder.setMessage("Please connect to the internet to use Map")
+                    .setCancelable(false)
+                    .setPositiveButton("Connect", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int i) {
+                            startActivity(new Intent(Settings.ACTION_WIFI_SETTINGS));
+
+                        }
+                    })
+                    .setNegativeButton("Cancel", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface dialog, int i) {
+                            System.exit(0);
+
+                        }
+                    });
+
+
+        }
+    }
+
     public void onClick(View view) {
         CameraPosition cameraPosition = new CameraPosition.Builder()
                 .target(new LatLng(locationComponent.getLastKnownLocation().getLatitude(),
                         locationComponent.getLastKnownLocation().getLongitude()))
-                .zoom(17)
+                .zoom(16)
                 .build();
         //    mapboxMap.setCameraPosition(cameraPosition);
         mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),1000);
@@ -213,7 +263,7 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                     /*Move map camera to the selected location*/
                     mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(new CameraPosition.Builder()
                             .target(new LatLng(((Point) selectedCarmenFeature.geometry()).latitude(),
-                                    ((Point) selectedCarmenFeature.geometry()).longitude())).zoom(25)
+                                    ((Point) selectedCarmenFeature.geometry()).longitude())).zoom(24)
                             .build()),4000);
 
                     }
@@ -424,13 +474,22 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
     public boolean onCreateOptionsMenu(Menu menu){
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.menu,menu);
+        inflater.inflate(R.menu.share_menu,menu);
         return true;
 
     }
+
+
+
     @SuppressLint("ResourceType")
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         switch (item.getItemId()) {
+            case R.id.Share:
+                Intent intent = new Intent(MainActivities.this,Share_Activity.class);
+                startActivity(intent);
+                finish();
+                return true;
             case R.id.menu_street:
                 mapboxMap.setStyle(Style.MAPBOX_STREETS);
                 return true;
@@ -458,7 +517,6 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
               //  setContentView(R.raw.style);
                 mapView = (MapView) findViewById(R.id.mapView);
                 mapView.getMapAsync(this);
-
                 return true;
 
 

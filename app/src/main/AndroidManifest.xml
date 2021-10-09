@@ -6,6 +6,7 @@
     <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
+    <uses-permission android:name="android.permission.ACCESS_WIFI_STATE" />
 
     <application
         android:allowBackup="true"
@@ -14,6 +15,9 @@
         android:roundIcon="@mipmap/ic_launcher_logo_44_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.ProjectIndoors">
+        <activity
+            android:name=".Share_Activity"
+            android:exported="true" />
         <activity
             android:name=".MainActivities"
             android:exported="true" />
