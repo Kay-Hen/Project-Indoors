@@ -18,6 +18,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.graphics.Color;
+import android.graphics.PointF;
 import android.graphics.drawable.Drawable;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -39,6 +40,8 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.res.ResourcesCompat;
 
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
 import com.mapbox.android.core.permissions.PermissionsListener;
 import com.mapbox.android.core.permissions.PermissionsManager;
 import com.mapbox.api.directions.v5.models.DirectionsResponse;
@@ -72,7 +75,12 @@ import com.mapbox.services.android.navigation.ui.v5.route.NavigationMapRoute;
 import com.mapbox.services.android.navigation.v5.navigation.NavigationRoute;
 
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import retrofit2.Call;
 import retrofit2.Callback;
@@ -95,6 +103,7 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
     private String symbolIconId = "SymbolIconId";
     private int status=0;
     private Point originalPoint, destinationPoint;
+
 
 
     @Override
@@ -165,8 +174,6 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                 .build();
         //    mapboxMap.setCameraPosition(cameraPosition);
         mapboxMap.animateCamera(CameraUpdateFactory.newCameraPosition(cameraPosition),1000);
-
-
     }
 
 
@@ -188,16 +195,38 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                         button.setOnClickListener(new View.OnClickListener() {
                             @Override
                             public void onClick(View view) {
-                                if (status !=1){
-                                    NavigationLauncherOptions options = NavigationLauncherOptions.builder()
-                                            .directionsRoute(currentRoute)
-                                            .shouldSimulateRoute(true)
-                                            .build();
-                                    NavigationLauncher.startNavigation(MainActivities.this, options);
-                                }else if (status ==1){
-                                    status = 0;
-                                    getRoute(originalPoint, destinationPoint);
+                                try
+                                {
+                                    if (status !=1){
+                                        NavigationLauncherOptions options = NavigationLauncherOptions.builder()
+                                                .directionsRoute(currentRoute)
+                                                .shouldSimulateRoute(true)
+                                                .build();
+                                        NavigationLauncher.startNavigation(MainActivities.this, options);
+                                    }else if (status ==1){
+                                        status = 0;
+                                        getRoute(originalPoint, destinationPoint);
+                                    }
+
+                                }catch(Exception e)
+                                {
+                                    //do something when an error is detected....
+                                    new AlertDialog.Builder(MainActivities.this)
+                                            .setTitle("No internet connection")
+                                            .setMessage("Your require internet to enable navigation")
+                                            .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    finish();
+
+                                                }
+                                            });
+
                                 }
+
+
+
+
                                 //boolean simulateRoute = true;
 
                             }
@@ -237,12 +266,16 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                     .accessToken(Mapbox.getAccessToken() != null ? Mapbox.getAccessToken() : getString(R.string.access_token))
                     .placeOptions(PlaceOptions.builder()
                             .backgroundColor(Color.parseColor("#EEEEEE"))
-                            .limit(10)
+                            .limit(5)
                             .build(PlaceOptions.MODE_CARDS))
                     .build(this);
             startActivityForResult(intent, REQUEST_CODE_AUTOCOMPLETE);
         });
     }
+
+
+
+
 
     @Override
     protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
@@ -289,7 +322,10 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
                 iconImage("destination-icon-id"),
                 iconAllowOverlap(true),
                 iconIgnorePlacement(true)
+                //iconOffset(new Float[] {0f, -9f})
+
         );
+
         loadedMapStyle.addLayer(destinationSymbolLayer);
     }
 
@@ -297,6 +333,42 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
     @SuppressWarnings( {"MissingPermission"})
     @Override
     public boolean onMapClick(@NonNull LatLng point) {
+
+        double latitude = point.getLatitude();
+        double longitude = point.getLongitude();
+       Toast.makeText(MainActivities.this, "latitude: "+latitude+", longitude: "+longitude, Toast.LENGTH_SHORT).show();
+
+        final PointF pixel = mapboxMap.getProjection().toScreenLocation(point);
+        List<Feature> features = mapboxMap.queryRenderedFeatures(pixel);
+
+        if (features.size()>0)
+        {
+            Feature feature = features.get(0);
+            if (feature.properties()!=null)
+            {
+
+                JSONObject locationData = new JSONObject();
+                for (Map.Entry<String, JsonElement> entry: feature.properties().entrySet()){
+                    try {
+                        locationData.put(entry.getKey(),entry.getValue().toString());
+                    } catch (JSONException e) {
+                        e.printStackTrace();
+                    }
+
+                }
+
+                try {
+                    String location_name = locationData.getString("name");
+                    String description = locationData.getString("description");
+                    Toast.makeText(MainActivities.this, "location_name: "+location_name+", description: "+description, Toast.LENGTH_SHORT).show();
+                    Log.d(TAG, String.format("%s = %s ", location_name, description));
+                } catch (JSONException e) {
+                    e.printStackTrace();
+                }
+
+            }
+        }
+
 
         Point destinationPoint = Point.fromLngLat(point.getLongitude(), point.getLatitude());
          Point originalPoint = Point.fromLngLat(locationComponent.getLastKnownLocation().getLongitude(),
@@ -384,6 +456,7 @@ public class MainActivities extends AppCompatActivity implements OnMapReadyCallb
 
             // Set the component's render mode
             locationComponent.setRenderMode(RenderMode.COMPASS);
+
 
 
             if (ActivityCompat.checkSelfPermission(this,Manifest.permission.ACCESS_FINE_LOCATION)!=
